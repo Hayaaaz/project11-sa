@@ -3,7 +3,7 @@ set -uo pipefail
 # ------------------------------------------------------------
 # Restore Test Script for AI Estate
 # Project: project11-sa
-# Owner: Haya
+# Haya Hussein
 # ------------------------------------------------------------
 
 TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
