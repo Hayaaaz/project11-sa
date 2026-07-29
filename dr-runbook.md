@@ -81,8 +81,11 @@ docker exec -it ai_estate_db psql -U aiuser -d aidev -f /init.sql
 
 Expected output:
 CREATE EXTENSION
+
 CREATE TABLE
+
 CREATE TABLE
+
 CREATE INDEX
 
 ------------------------------------------------------------
@@ -103,13 +106,18 @@ If embeddings.sql is missing:
 ------------------------------------------------------------
 
 Step 1 — Rebuild index
+
 docker exec -it ai_estate_db psql -U aiuser -d aidev -c "
+
 DROP INDEX IF EXISTS embeddings_hnsw_idx;
+
 CREATE INDEX embeddings_hnsw_idx ON embeddings USING hnsw (embedding vector_l2_ops);
 "
 
 Expected:
+
 DROP INDEX
+
 CREATE INDEX
 
 ------------------------------------------------------------
@@ -134,24 +142,27 @@ LIMIT 3;
 ------------------------------------------------------------
 
 docker-compose down
+
 docker-compose up -d
+
 docker ps
 
 Expected:
+
 ai_estate_db   Up
 
 ------------------------------------------------------------
 5. Completion Checklist
 ------------------------------------------------------------
 
-[ ] Schema applied
-[ ] documents.sql restored
-[ ] embeddings.sql restored
-[ ] HNSW index rebuilt
-[ ] Vector search validated
-[ ] Docker stack running
-[ ] DR artifacts verified
-[ ] Human sign-off completed
+-[ ] Schema applied
+-[ ] documents.sql restored
+-[ ] embeddings.sql restored
+-[ ] HNSW index rebuilt
+-[ ] Vector search validated
+-[ ] Docker stack running
+-[ ] DR artifacts verified
+-[ ] Human sign-off completed
 
 ------------------------------------------------------------
 6. Notes
