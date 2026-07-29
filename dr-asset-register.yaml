@@ -1,0 +1,114 @@
+ai_estate:
+  name: project11-sa
+  owner: haya
+  environment: practice-lab
+
+assets:
+
+  # ---------------------------------------------------------
+  # 1. Source Code (Reproducible)
+  # ---------------------------------------------------------
+  - name: application_source
+    type: code
+    location: ./src
+    classification: reproducible
+    rpo: 24h
+    rto: 4h
+    backup: github
+    immutable: false
+
+  # ---------------------------------------------------------
+  # 2. Database Schema (Reproducible)
+  # ---------------------------------------------------------
+  - name: database_schema
+    type: sql
+    location: ./init.sql
+    classification: reproducible
+    rpo: 24h
+    rto: 2h
+    backup: github
+    immutable: true
+
+  # ---------------------------------------------------------
+  # 3. Seed Data (Reproducible)
+  # ---------------------------------------------------------
+  - name: seed_data
+    type: sql
+    location: ./seed_data.sql
+    classification: reproducible
+    rpo: 24h
+    rto: 2h
+    backup: github
+    immutable: true
+
+  # ---------------------------------------------------------
+  # 4. Vector Database (Irreplaceable)
+  # ---------------------------------------------------------
+  - name: vector_database
+    type: postgres+pgvector
+    location: docker volume: db_data
+    classification: irreplaceable
+    rpo: 1h
+    rto: 30m
+    backup: volume_snapshot
+    immutable: false
+
+  # ---------------------------------------------------------
+  # 5. HNSW Index (Derived)
+  # ---------------------------------------------------------
+  - name: hnsw_index
+    type: pgvector_index
+    location: postgres internal
+    classification: derived
+    rpo: 0h
+    rto: 1h
+    backup: regenerate_from_embeddings
+    immutable: false
+
+  # ---------------------------------------------------------
+  # 6. Embeddings (Irreplaceable)
+  # ---------------------------------------------------------
+  - name: embeddings
+    type: vector_data
+    location: postgres table: embeddings
+    classification: irreplaceable
+    rpo: 1h
+    rto: 30m
+    backup: volume_snapshot
+    immutable: false
+
+  # ---------------------------------------------------------
+  # 7. Documents (Irreplaceable)
+  # ---------------------------------------------------------
+  - name: documents
+    type: text_data
+    location: postgres table: documents
+    classification: irreplaceable
+    rpo: 1h
+    rto: 30m
+    backup: volume_snapshot
+    immutable: false
+
+  # ---------------------------------------------------------
+  # 8. Docker Compose (Reproducible)
+  # ---------------------------------------------------------
+  - name: docker_compose
+    type: config
+    location: ./docker-compose.yml
+    classification: reproducible
+    rpo: 24h
+    rto: 1h
+    backup: github
+    immutable: true
+
+  # ---------------------------------------------------------
+  # 9. Model Checkpoint (Reproducible)
+  # ---------------------------------------------------------
+  - name: model_checkpoint
+    type: none
+    location: none
+    classification: reproducible
+    rpo: 24h
+    rto: 1h
+    backup: none
+    immutable: false
