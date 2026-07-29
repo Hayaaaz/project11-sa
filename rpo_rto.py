@@ -1,6 +1,6 @@
 # rpo_rto.py
 # AI Estate — RPO/RTO Calculator
-# Owner: Haya
+# Haya Hussein
 
 import datetime
 
