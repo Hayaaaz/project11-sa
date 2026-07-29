@@ -1,5 +1,5 @@
 AI Estate — Disaster Recovery Plan
-Owner: Haya
+Haya Hussein
 Project: project11-sa
 Date: 2026-07-29
 
@@ -53,7 +53,7 @@ Performed by backup_ai_estate.sh:
 RESTORE PROCEDURE
 Performed by restore_test.sh:
 1. Stop and remove existing database container
-2. Remove old volume (warning if missing is normal)
+2. Remove old volume 
 3. Start fresh Postgres + pgvector
 4. Apply schema from init.sql
 5. Restore documents.sql and embeddings.sql
@@ -93,7 +93,7 @@ Owner: Haya
 
 DR RISKS & MITIGATIONS
 Risk: Backup folder missing
-Mitigation: Backup script exits with error.
+Mitigation: Backup script exits with an error.
 
 Risk: Volume missing during restore
 Mitigation: Warning is acceptable; restore continues.
