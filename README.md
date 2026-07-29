@@ -1,5 +1,5 @@
 # AI Estate — Disaster Recovery Project
-## Owner: Haya
+---
 
 ***This project provides backup and restore automation for the AI Estate database (Postgres + pgvector). It includes scripts, documentation, and logs required for DR validation.***
 ---
