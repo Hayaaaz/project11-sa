@@ -5,6 +5,7 @@
 ---
 
 **FILES**
+---
 - backup_ai_estate.sh
 - restore_test.sh
 - dr-asset-register.yaml
@@ -15,12 +16,19 @@
 - init.sql
 - README.txt
 
+---
 **HOW TO BACK UP**
+---
+
 ***./backup_ai_estate.sh***
 
 Backups saved in ./backups/<timestamp>/ and copied to /mnt/backup2/.
 
+---
+
 **HOW TO RESTORE**
+---
+
 Start DB:
 
 ***docker-compose up -d***
@@ -29,7 +37,10 @@ Run restore test:
 
 ***./restore_test.sh | tee restore-test.log***
 
+---
+
 **SUCCESS INDICATOR**
+---
 
 === Restore Test Completed Successfully ===
 
