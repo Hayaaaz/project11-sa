@@ -3,7 +3,89 @@ Owner: Haya
 Project: project11-sa
 Date: 2026-07-29
 
-This log records the actions taken by the DR agent (backup + restore automation) during the disaster recovery workflow for the AI Estate.
+This log documents how AI assistance was used during Project 11, what was delegated,
+what the agent produced, what went wrong, where human judgment intervened, and the
+decisions the agent did NOT make. This structure follows the required five-field
+format from instructor feedback.
+
+============================================================
+SECTION 1 — WHAT WAS DELEGATED TO THE AGENT
+============================================================
+I delegated the following tasks to the AI assistant:
+- Drafting the initial structure for DR-PLAN.txt.
+- Drafting the initial structure for dr-runbook.md.
+- Explaining the backup/restore concepts from Chapter 11.
+- Helping identify irreplaceable vs. reproducible assets.
+- Helping format the restore-test log summary.
+- Assisting with RPO/RTO explanation and formatting.
+- Helping troubleshoot GitHub push issues (non-DR related).
+
+The agent was used for *drafting and explanation*, not execution.
+
+============================================================
+SECTION 2 — WHAT THE AGENT ACTUALLY DID
+============================================================
+The agent produced:
+- A clean, ordered DR plan outline.
+- A structured runbook draft with step-by-step restore actions.
+- Explanations of 3–2–1 backups, immutability, and asset classification.
+- Guidance on how to phrase RPO/RTO in the DR plan.
+- A readable summary format for agent-log.txt.
+- Troubleshooting steps for Git/GitHub authentication and DNS issues.
+
+The agent provided *textual scaffolding* only — no commands were executed by the agent.
+
+============================================================
+SECTION 3 — WHAT WENT WRONG (AI FAILURE MODES)
+============================================================
+The agent produced several issues that required correction:
+- Some restore commands were suggested in a generic form that did not match
+  my actual Postgres container name or volume name.
+- The agent occasionally assumed cloud storage (S3) was mandatory, even though
+  it is optional in my environment.
+- Some RTO estimates were too optimistic and did not include real timing from
+  my restore-test.sh execution.
+- The agent initially omitted the required “Decisions the agent did NOT make”
+  section in the agent log.
+- The agent sometimes generalized asset classification beyond the scope of my
+  project (e.g., OCI artifact patterns not used here).
+
+These issues were corrected manually.
+
+============================================================
+SECTION 4 — WHERE THE HUMAN INTERVENED
+============================================================
+I intervened in the following ways:
+- Replaced generic restore commands with the exact commands from my scripts.
+- Ensured the DR plan matched the real behavior of backup_ai_estate.sh and
+  restore_test.sh.
+- Corrected RTO values using actual measured restore times.
+- Ensured asset classification matched my real estate (documents, embeddings,
+  schema, index).
+- Removed AI assumptions about cloud infrastructure not used in my project.
+- Added missing required sections to the agent log.
+- Verified every command in the runbook by running restore_test.sh myself.
+
+Human judgment validated every step of the DR plan and runbook.
+
+============================================================
+SECTION 5 — DECISIONS THE AGENT DID NOT MAKE
+============================================================
+The agent did NOT:
+- Choose the RPO or RTO — I set these based on real restore timing.
+- Validate the backup — I ran backup_ai_estate.sh myself.
+- Validate the restore — I ran restore_test.sh myself.
+- Classify assets — I confirmed irreplaceable vs. reproducible manually.
+- Approve the DR plan — I reviewed and finalized it myself.
+- Execute any commands — all commands were run by me.
+- Decide what goes into the repo — I chose what to commit.
+- Certify the DR system — I verified the PASS status manually.
+
+These decisions remained fully human-owned, as required by Chapter 11.
+
+============================================================
+SECTION 6 — SCRIPT EXECUTION LOGS (BACKUP + RESTORE)
+============================================================
 
 === BACKUP EXECUTION ===
 Backup Script: backup_ai_estate.sh
