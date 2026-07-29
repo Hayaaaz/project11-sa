@@ -1,0 +1,83 @@
+=== Starting Restore Test at 20260729-161026 ===
+[1] Stopping docker stack...
+[2] Removing old db_data volume...
+[3] Starting fresh Postgres + pgvector...
+[4] Applying schema...
+CREATE EXTENSION
+[5] Restoring irreplaceable assets...
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+SET
+SET
+SET
+SET
+SET
+ALTER TABLE
+ALTER TABLE
+ALTER SEQUENCE
+ALTER TABLE
+ setval 
+--------
+      3
+(1 row)
+
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+SET
+SET
+SET
+SET
+SET
+ALTER TABLE
+ALTER TABLE
+ALTER SEQUENCE
+ALTER TABLE
+ setval 
+--------
+      3
+(1 row)
+
+[6] Rebuilding HNSW index...
+DROP INDEX
+CREATE INDEX
+[7] Validating restore...
+Documents count:
+ count 
+-------
+     3
+(1 row)
+
+Embeddings count:
+ count 
+-------
+     3
+(1 row)
+
+Vector search test:
+ id | document_id 
+----+-------------
+  3 |           3
+  1 |           1
+  2 |           2
+(3 rows)
+
+=== Restore Test Completed Successfully ===
+=== Restore Test Completed Successfully ===

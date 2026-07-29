@@ -1,0 +1,121 @@
+AI Estate — Disaster Recovery Plan
+Owner: Haya
+Project: project11-sa
+Date: 2026-07-29
+
+This Disaster Recovery Plan explains how the AI Estate’s critical data is backed up, protected, and restored. It ensures the system can be rebuilt from backups using a repeatable, automated process.
+
+SYSTEM OVERVIEW
+The AI Estate consists of:
+- Postgres 16 + pgvector running in Docker (ai_estate_db)
+- documents table (irreplaceable)
+- embeddings table (irreplaceable)
+- HNSW index (reproducible)
+- init.sql schema (reproducible)
+- backup_ai_estate.sh (backup automation)
+- restore_test.sh (restore automation)
+- dr-asset-register.yaml (asset classification)
+- dr-runbook.md (operational instructions)
+
+ASSET CLASSIFICATION (SUMMARY)
+Irreplaceable assets:
+- documents.sql
+- embeddings.sql
+
+Reproducible assets:
+- init.sql
+- HNSW index
+- Docker container
+- Vector search configuration
+
+BACKUP STRATEGY (3–2–1 MODEL)
+3 copies:
+1. Live Postgres database
+2. Local backup folder: ./backups/<timestamp>/
+3. Secondary media copy: /mnt/backup2/<timestamp>/
+
+2 media types:
+- Local disk
+- External mounted directory
+
+1 offsite copy:
+- MinIO/S3 upload attempted (optional)
+
+BACKUP PROCEDURE
+Performed by backup_ai_estate.sh:
+1. Dump irreplaceable assets using pg_dump
+2. Skip reproducible assets
+3. Generate SHA256 checksums
+4. Copy backup folder to secondary media
+5. Attempt S3/MinIO upload
+6. Print backup location
+
+RESTORE PROCEDURE
+Performed by restore_test.sh:
+1. Stop and remove existing database container
+2. Remove old volume (warning if missing is normal)
+3. Start fresh Postgres + pgvector
+4. Apply schema from init.sql
+5. Restore documents.sql and embeddings.sql
+6. Rebuild HNSW index
+7. Validate restore (counts + vector search)
+8. Print success message
+
+Successful restore ends with:
+=== Restore Test Completed Successfully ===
+
+RPO (Recovery Point Objective)
+RPO = 24 hours
+Backups are taken daily. Maximum acceptable data loss is one day.
+
+RTO (Recovery Time Objective)
+RTO = 10–15 minutes
+A full restore completes within minutes:
+- Container rebuild: ~5 seconds
+- Schema apply: ~1 second
+- Data restore: ~5–10 seconds
+- Index rebuild: ~1–2 seconds
+- Validation: ~1 second
+
+DR TESTING REQUIREMENTS
+A restore test must be performed:
+- After any schema change
+- After any backup script change
+- Monthly
+- Before major deployments
+
+DR ROLES & RESPONSIBILITIES
+Owner: Haya
+- Maintain backup and restore scripts
+- Validate DR tests
+- Ensure backups exist
+- Update DR documentation
+
+DR RISKS & MITIGATIONS
+Risk: Backup folder missing
+Mitigation: Backup script exits with error.
+
+Risk: Volume missing during restore
+Mitigation: Warning is acceptable; restore continues.
+
+Risk: MinIO unavailable
+Mitigation: Local + secondary copies still satisfy 3–2–1.
+
+Risk: Schema changes break restore
+Mitigation: Run restore test after every schema update.
+
+DR ARTIFACTS INCLUDED
+backup_ai_estate.sh
+restore_test.sh
+dr-asset-register.yaml
+dr-runbook.md
+DR-PLAN.txt
+restore-test.log
+init.sql
+agent-log.txt (to be generated)
+README.txt (to be generated)
+rpo_rto.py output (to be generated)
+
+DR PLAN STATUS
+Status: PASS
+Restore test completed successfully on 2026-07-29

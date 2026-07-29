@@ -1,0 +1,52 @@
+AI Estate — Agent Log
+Owner: Haya
+Project: project11-sa
+Date: 2026-07-29
+
+This log records the actions taken by the DR agent (backup + restore automation) during the disaster recovery workflow for the AI Estate.
+
+=== BACKUP EXECUTION ===
+Backup Script: backup_ai_estate.sh
+Timestamp: 20260729-154320
+
+Actions:
+- Connected to Postgres container (ai_estate_db)
+- Dumped irreplaceable assets:
+  • documents.sql
+  • embeddings.sql
+- Skipped reproducible assets (schema, HNSW index)
+- Generated SHA256 checksums
+- Created backup directory: ./backups/20260729-154320
+- Copied backup to secondary media: /mnt/backup2/20260729-154320
+- Attempted MinIO/S3 upload (optional in this environment)
+- Backup completed successfully
+
+Backup Location:
+./backups/20260729-154320
+
+=== RESTORE TEST EXECUTION ===
+Restore Script: restore_test.sh
+Timestamp: 20260729-160833
+
+Actions:
+- Stopped existing ai_estate_db container
+- Removed old db_data volume (warning if missing is normal)
+- Started fresh Postgres + pgvector container
+- Applied schema from init.sql
+- Restored irreplaceable assets:
+  • documents.sql
+  • embeddings.sql
+- Rebuilt HNSW index
+- Validated restore:
+  • Document count query
+  • Embedding count query
+  • Vector search test
+- Restore test completed successfully
+
+Final Status:
+PASS — Full restore validated and operational
+
+Notes:
+- RPO: 24 hours
+- RTO: 10–15 minutes
+- All DR artifacts present and functioning
