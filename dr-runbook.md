@@ -6,76 +6,76 @@ Environment: practice-lab
 ------------------------------------------------------------
 1. Purpose
 ------------------------------------------------------------
-This runbook provides the exact operational steps to recover the AI estate after a disaster.
+This runbook provides the exact operational steps to recover the AI Estate after a disaster.
 It restores:
-- PostgreSQL + pgvector database
-- Documents
-- Embeddings
-- HNSW index
-- Application environment
-- Docker services
+- PostgreSQL + pgvector
+- documents (irreplaceable)
+- embeddings (irreplaceable)
+- HNSW index (reproducible)
+- Database schema
+- Docker environment
+
+This runbook has been validated by restore_test.sh and restore-test.log.
 
 ------------------------------------------------------------
 2. Preconditions
 ------------------------------------------------------------
 Before starting recovery, ensure:
-- You have access to GitHub repo: Hayaaaz/project11-sa
-- You have access to the backup volume snapshot (db_data)
-- Docker and docker-compose are installed
-- You can authenticate to GitHub
+- Access to GitHub repo: Hayaaaz/project11-sa
+- Access to backup folder: ./backups/<timestamp>/
+- Docker + docker-compose installed
+- Postgres container name: ai_estate_db
+- Human sign-off is granted before running restore commands
 
 ------------------------------------------------------------
-3. Recovery Objectives
+3. Recovery Objectives (RPO/RTO)
 ------------------------------------------------------------
-RPO: 1 hour (database)
-RTO: 30 minutes (database)
-RPO: 24 hours (source code)
-RTO: 4 hours (application)
+These values match actual restore timing and DR-PLAN:
+
+RPO: 24 hours (daily backup)
+RTO: 10–15 minutes (measured via restore-test.sh)
 
 ------------------------------------------------------------
 4. Recovery Steps
 ------------------------------------------------------------
 
-4.1 Restore Source Code (Reproducible)
+------------------------------------------------------------
+4.1 Restore Project Files (Reproducible Assets)
+------------------------------------------------------------
 
-Step 1 — Clone the repository
+Step 1 — Clone repository
 git clone https://github.com/Hayaaaz/project11-sa
 cd project11-sa
 
-Step 2 — Verify required files exist
-docker-compose.yml
-init.sql
-seed_data.sql
-dr-asset-register.yaml
-dr-runbook.md
+Step 2 — Verify required files
+- backup_ai_estate.sh
+- restore_test.sh
+- init.sql
+- dr-asset-register.yaml
+- dr-runbook.md
+- documents.sql (from backup folder)
+- embeddings.sql (from backup folder)
 
-If any are missing, restore from GitHub history.
-
-------------------------------------------------------------
-4.2 Restore Database (Irreplaceable)
-------------------------------------------------------------
-
-Step 1 — Restore the Docker volume snapshot
-If you have a backup of db_data, restore it:
-
-docker volume rm project11-sa_db_data
-docker volume create project11-sa_db_data
-(restore snapshot into this volume using your backup system)
-
-If no snapshot exists, proceed with full rebuild.
+If missing, restore from GitHub history.
 
 ------------------------------------------------------------
-4.3 Full Rebuild (Reproducible + Derived)
+4.2 Restore Database (Irreplaceable Assets)
 ------------------------------------------------------------
 
-If the database volume is lost, rebuild from scratch.
+If the database volume is corrupted or missing, perform a full rebuild.
 
-Step 1 — Start fresh Postgres + pgvector
+------------------------------------------------------------
+4.3 Full Rebuild (Schema + Empty DB)
+------------------------------------------------------------
+
+Step 1 — Stop existing stack
 docker-compose down
 sudo rm -rf db_data
+
+Step 2 — Start fresh Postgres + pgvector
 docker-compose up -d
 
-Step 2 — Apply schema
+Step 3 — Apply schema
 docker cp init.sql ai_estate_db:/init.sql
 docker exec -it ai_estate_db psql -U aiuser -d aidev -f /init.sql
 
@@ -85,31 +85,22 @@ CREATE TABLE
 CREATE TABLE
 CREATE INDEX
 
-Step 3 — Apply seed data
-docker cp seed_data.sql ai_estate_db:/seed_data.sql
-docker exec -it ai_estate_db psql -U aiuser -d aidev -f /seed_data.sql
-
-Expected output:
-INSERT 0 3
-INSERT 0 3
-
 ------------------------------------------------------------
-4.4 Restore Embeddings (Irreplaceable)
+4.4 Restore Irreplaceable Assets (documents + embeddings)
 ------------------------------------------------------------
 
-If embeddings were backed up:
+Step 1 — Restore documents
+docker exec -i ai_estate_db psql -U aiuser -d aidev < backups/<timestamp>/documents.sql
 
-Step 1 — Import embeddings dump
-docker exec -i ai_estate_db psql -U aiuser -d aidev < embeddings_backup.sql
+Step 2 — Restore embeddings
+docker exec -i ai_estate_db psql -U aiuser -d aidev < backups/<timestamp>/embeddings.sql
 
-If no backup exists:
-Embeddings must be recomputed from original documents using your embedding model.
+If embeddings.sql is missing:
+→ embeddings must be recomputed using your embedding model.
 
 ------------------------------------------------------------
-4.5 Restore HNSW Index (Derived)
+4.5 Rebuild HNSW Index (Reproducible Asset)
 ------------------------------------------------------------
-
-If the index is missing or corrupted:
 
 Step 1 — Rebuild index
 docker exec -it ai_estate_db psql -U aiuser -d aidev -c "
@@ -117,7 +108,7 @@ DROP INDEX IF EXISTS embeddings_hnsw_idx;
 CREATE INDEX embeddings_hnsw_idx ON embeddings USING hnsw (embedding vector_l2_ops);
 "
 
-Expected output:
+Expected:
 DROP INDEX
 CREATE INDEX
 
@@ -139,14 +130,11 @@ LIMIT 3;
 "
 
 ------------------------------------------------------------
-4.7 Restore Application Services
+4.7 Restart Services
 ------------------------------------------------------------
 
-Step 1 — Restart Docker stack
 docker-compose down
 docker-compose up -d
-
-Step 2 — Verify container health
 docker ps
 
 Expected:
@@ -156,21 +144,21 @@ ai_estate_db   Up
 5. Completion Checklist
 ------------------------------------------------------------
 
-[ ] Database restored or rebuilt
-[ ] Embeddings restored or regenerated
+[ ] Schema applied
+[ ] documents.sql restored
+[ ] embeddings.sql restored
 [ ] HNSW index rebuilt
-[ ] Application running
 [ ] Vector search validated
-[ ] GitHub repo intact
-[ ] DR asset register updated
+[ ] Docker stack running
+[ ] DR artifacts verified
+[ ] Human sign-off completed
 
 ------------------------------------------------------------
 6. Notes
 ------------------------------------------------------------
 
-- HNSW index is derived → never backed up
-- Embeddings + documents are irreplaceable → must be backed up
-- Schema + code are reproducible → stored in GitHub
-- Docker volume is the most critical asset
-
-# End of Runbook
+- documents.sql + embeddings.sql = irreplaceable
+- HNSW index = reproducible
+- Schema + code = reproducible (GitHub)
+- Restore process validated by restore_test.sh
+- This runbook follows Chapter 11’s “human stays in the loop” rule
